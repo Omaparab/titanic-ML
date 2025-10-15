@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert Data - Titanic Dataset</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        input, select, textarea {
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        .form-group {
+            transition: all 0.3s ease;
+        }
+        .form-group:hover {
+            background-color: rgba(249, 240, 255, 0.5);
+        }
+        .prediction-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-purple-600 hover:text-purple-700 transition flex items-center">
+                <i data-lucide="ship" class="w-7 h-7 mr-2"></i> TitanicML
+            </a>
+            <div class="flex space-x-6 text-sm font-medium">
+                <a href="/" class="text-gray-700 hover:text-purple-600 transition">Dashboard</a>
+                <a href="/experiment" class="text-gray-700 hover:text-purple-600 transition">Experiment</a>
+                <a href="/insert" class="text-purple-600 font-semibold border-b-2 border-purple-600">Insert Data</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Hero Section -->
+        <section class="text-center py-8 text-white mb-8">
+            <h1 class="text-5xl font-extrabold leading-tight mb-4">
+                Add New Records
+            </h1>
+            <p class="text-xl text-purple-100 max-w-2xl mx-auto">
+                Insert new passenger records and predict survival outcomes using ML
+            </p>
+        </section>
+
+        <!-- Info Alert -->
+        <section class="card rounded-2xl p-6 mb-8 bg-blue-50 border-2 border-blue-200">
+            <div class="flex items-start">
+                <i data-lucide="info" class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-1"></i>
+                <div>
+                    <h3 class="font-bold text-blue-900 mb-2">Automatic Survival Prediction</h3>
+                    <p class="text-blue-800 text-sm">
+                        Fill in the passenger details below. The survival outcome will be automatically predicted using our trained Random Forest model based on the provided information.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insert Form Section -->
+        <section class="card rounded-2xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                <i data-lucide="plus-circle" class="w-8 h-8 text-purple-600 mr-3"></i>
+                Passenger Information Form
+            </h2>
+            <p class="text-gray-600 mb-6">Fill in the details below to add a new passenger record</p>
+
+            <form id="insert-form" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Passenger Class -->
+                    <div class="form-group p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="layers" class="w-4 h-4 text-purple-600 mr-2"></i>
+                            Passenger Class *
+                        </label>
+                        <select id="pclass" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none">
+                            <option value="">Select Class</option>
+                            <option value="1">1st Class</option>
+                            <option value="2">2nd Class</option>
+                            <option value="3">3rd Class</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">The passenger's ticket class</p>
+                    </div>
+
+                    <!-- Name -->
+                    <div class="form-group p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="user" class="w-4 h-4 text-purple-600 mr-2"></i>
+                            Full Name *
+                        </label>
+                        <input type="text" id="name" required placeholder="e.g., Mr. John Smith" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none">
+                        <p class="text-xs text-gray-500 mt-1">Passenger's full name with title (Mr., Mrs., Miss, Master, etc.)</p>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="users" class="w-4 h-4 text-purple-600 mr-2"></i>
+                            Gender *
+                        </label>
+                        <select id="sex" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Passenger's gender</p>
+                    </div>
+
+                    <!-- Age -->
+                    <div class="form-group p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="calendar" class="w-4 h-4 text-purple-600 mr-2"></i>
+                            Age *
+                        </label>
+                        <input type="number" id="age" required min="0" max="150" step="0.1" placeholder="e.g., 25" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none">
+                        <p class="text-xs text-gray-500 mt-1">Passenger's age in years</p>
+                    </div>
+
+                    <!-- Siblings/Spouses -->
+                    <div class="form-group p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="heart-handshake" class="w-4 h-4 text-purple-600 mr-2"></i>
+                            Siblings/Spouses Aboard *
+                        </label>
+                        <input type="number" id="sibsp" required min="0" max="10" placeholder="0" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none">
+                        <p class="text-xs text-gray-500 mt-1">Number of siblings or spouses aboard</p>
+                    </div>
+
+                    <!-- Parents/Children -->
+                    <div class="form-group p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="baby" class="w-4 h-4 text-purple-600 mr-2"></i>
+                            Parents/Children Aboard *
+                        </label>
+                        <input type="number" id="parch" required min="0" max="10" placeholder="0" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none">
+                        <p class="text-xs text-gray-500 mt-1">Number of parents or children aboard</p>
+                    </div>
+
+                    <!-- Fare -->
+                    <div class="form-group p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="pound-sterling" class="w-4 h-4 text-purple-600 mr-2"></i>
+                            Ticket Fare *
+                        </label>
+                        <input type="number" id="fare" required min="0" step="0.01" placeholder="e.g., 52.86" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none">
+                        <p class="text-xs text-gray-500 mt-1">Ticket fare in pounds (£)</p>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group p-4 rounded-lg">
+                    <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center">
+                        <i data-lucide="note" class="w-4 h-4 text-purple-600 mr-2"></i>
+                        Additional Notes
+                    </label>
+                    <textarea id="notes" rows="3" placeholder="Optional notes about this record..." class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Optional information for reference</p>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="form-status" class="hidden"></div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-4 border-t-2 border-gray-200">
+                    <button type="submit" class="flex-1 inline-flex items-center justify-center px-6 py-3 text-lg font-medium rounded-full text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg transform hover:scale-105 transition duration-300">
+                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i> Predict & Add Record
+                    </button>
+                    <button type="reset" class="flex-1 inline-flex items-center justify-center px-6 py-3 text-lg font-medium rounded-full text-gray-700 bg-gray-100 hover:bg-gray-200 transition duration-300">
+                        <i data-lucide="rotate-ccw" class="w-5 h-5 mr-2"></i> Clear
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Recent Insertions Section -->
+        <section class="card rounded-2xl p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="history" class="w-8 h-8 text-green-600 mr-3"></i>
+                Recent Predictions
+            </h2>
+
+            <div id="recent-records" class="space-y-4">
+                <p class="text-gray-500 text-center py-8">No records added yet. Fill the form to predict and add a record!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-600 text-sm">
+            <p>&copy; 2024 TitanicML - Insert New Records with Survival Prediction</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        let recentInsertions = [];
+
+        const form = document.getElementById('insert-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await insertRecord();
+        });
+
+        async function insertRecord() {
+            const statusDiv = document.getElementById('form-status');
+            const formData = {
+                name: document.getElementById('name').value,
+                pclass: parseInt(document.getElementById('pclass').value),
+                sex: document.getElementById('sex').value,
+                age: parseFloat(document.getElementById('age').value),
+                sibsp: parseInt(document.getElementById('sibsp').value),
+                parch: parseInt(document.getElementById('parch').value),
+                fare: parseFloat(document.getElementById('fare').value),
+                notes: document.getElementById('notes').value
+            };
+
+            // Validate all required fields
+            if (!formData.name || !formData.pclass || !formData.sex || isNaN(formData.age) || 
+                isNaN(formData.sibsp) || isNaN(formData.parch) || isNaN(formData.fare)) {
+                statusDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                        <p class="text-red-700 font-medium">
+                            <i data-lucide="alert-circle" class="w-4 h-4 inline-block mr-2"></i>
+                            Please fill in all required fields
+                        </p>
+                    </div>
+                `;
+                statusDiv.classList.remove('hidden');
+                lucide.createIcons();
+                return;
+            }
+
+            statusDiv.innerHTML = `
+                <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                    <p class="text-blue-700">
+                        <i data-lucide="loader-circle" class="w-4 h-4 animate-spin inline-block mr-2"></i>
+                        Predicting survival outcome...
+                    </p>
+                </div>
+            `;
+            statusDiv.classList.remove('hidden');
+            lucide.createIcons();
+
+            try {
+                // Send data to backend for prediction
+                const response = await fetch('/predict_survival', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Add prediction result to record
+                    formData.survived = data.prediction;
+                    formData.survived_text = data.prediction === 1 ? 'Yes' : 'No';
+                    formData.prediction_probability = data.probability;
+                    formData.timestamp = new Date().toLocaleString();
+
+                    recentInsertions.unshift(formData);
+
+                    // Keep only last 5 records
+                    if (recentInsertions.length > 5) {
+                        recentInsertions = recentInsertions.slice(0, 5);
+                    }
+
+                    statusDiv.innerHTML = `
+                        <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded">
+                            <p class="text-green-700 font-medium">
+                                <i data-lucide="check-circle" class="w-4 h-4 inline-block mr-2"></i>
+                                Record saved to dataset! Predicted survival: <strong>${data.prediction === 1 ? 'Yes' : 'No'}</strong> (${(data.probability * 100).toFixed(2)}% confidence)
+                            </p>
+                        </div>
+                    `;
+
+                    // Reset form
+                    form.reset();
+
+                    // Update recent records display
+                    displayRecentRecords();
+
+                    // Hide status after 4 seconds
+                    setTimeout(() => {
+                        statusDiv.classList.add('hidden');
+                    }, 4000);
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                            <p class="text-red-700 font-medium">
+                                <i data-lucide="x-circle" class="w-4 h-4 inline-block mr-2"></i>
+                                Error: ${data.error}
+                            </p>
+                        </div>
+                    `;
+                }
+
+                lucide.createIcons();
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                        <p class="text-red-700 font-medium">
+                            <i data-lucide="x-circle" class="w-4 h-4 inline-block mr-2"></i>
+                            Error: ${error.message}
+                        </p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        function displayRecentRecords() {
+            const container = document.getElementById('recent-records');
+
+            if (recentInsertions.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No records added yet.</p>';
+                return;
+            }
+
+            container.innerHTML = recentInsertions.map((record, index) => `
+                <div class="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 hover:shadow-md transition">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-gray-800 flex items-center">
+                            <i data-lucide="user-check" class="w-5 h-5 text-purple-600 mr-2"></i>
+                            ${record.name}
+                        </h3>
+                        <span class="text-xs text-gray-500">${record.timestamp}</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm mb-3">
+                        <div><span class="text-gray-600">Class:</span> <span class="font-semibold text-gray-800">${record.pclass}</span></div>
+                        <div><span class="text-gray-600">Gender:</span> <span class="font-semibold text-gray-800 capitalize">${record.sex}</span></div>
+                        <div><span class="text-gray-600">Age:</span> <span class="font-semibold text-gray-800">${record.age}</span></div>
+                        <div><span class="text-gray-600">Fare:</span> <span class="font-semibold text-gray-800">£${record.fare.toFixed(2)}</span></div>
+                        <div><span class="text-gray-600">Family:</span> <span class="font-semibold text-gray-800">${record.sibsp + record.parch}</span></div>
+                    </div>
+
+                    <div class="p-3 bg-white rounded-lg border-2 ${record.survived === 1 ? 'border-green-300' : 'border-red-300'} mb-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-700 font-semibold">Predicted Survival:</span>
+                            <div class="flex items-center gap-2">
+                                <span class="prediction-badge ${record.survived === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    <i data-lucide="${record.survived === 1 ? 'check' : 'x'}" class="w-4 h-4 inline-block mr-1"></i>
+                                    ${record.survived_text}
+                                </span>
+                                <span class="text-xs text-gray-600">${(record.prediction_probability * 100).toFixed(2)}% confidence</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${record.notes ? `<p class="text-xs text-gray-600 italic">"${record.notes}"</p>` : ''}
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+    </script>
+
+</body>
+</html>

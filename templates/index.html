@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic Survival Prediction - Feature Generation ML</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .metric-card {
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .slider-value {
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #6366f1;
+        }
+        .drop-zone {
+            border: 2px dashed #9ca3af;
+            transition: all 0.3s ease;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #7c3aed;
+            background-color: #f5f3ff;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-purple-600 hover:text-purple-700 transition flex items-center">
+                <i data-lucide="ship" class="w-7 h-7 mr-2"></i> TitanicML
+            </a>
+            <div class="flex space-x-6 text-sm font-medium">
+                <a href="/dashboard" class="text-gray-700 hover:text-purple-600 transition">Dashboard</a>
+                <a href="/" class="text-purple-600 font-semibold border-b-2 border-purple-600">Experiment</a>
+                <a href="/insert" class="text-gray-700 hover:text-purple-600 transition">Insert Data</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Hero Section -->
+        <section class="text-center py-12 text-white">
+            <h1 class="text-5xl font-extrabold leading-tight mb-4">
+                Titanic Survival Prediction
+            </h1>
+            <p class="text-xl text-purple-100 max-w-3xl mx-auto mb-8">
+                Ensemble Machine Learning with Advanced Feature Generation
+            </p>
+        </section>
+
+        <!-- Dataset Upload Section -->
+        <section class="card rounded-2xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="upload" class="w-8 h-8 text-orange-600 mr-3"></i>
+                Upload Your Dataset
+            </h2>
+            
+            <div class="prose max-w-none mb-6">
+                <p class="text-gray-700 mb-4">
+                    Upload your Titanic dataset (CSV or Excel format) to store it in the project's datasets folder. 
+                    If the dataset already exists, you'll be notified.
+                </p>
+            </div>
+
+            <!-- Drop Zone -->
+            <div id="drop-zone" class="drop-zone p-10 rounded-xl text-center cursor-pointer">
+                <i data-lucide="cloud-upload" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                <p class="text-gray-600 mb-2 text-lg font-medium">Drag & Drop your dataset here</p>
+                <p class="text-gray-500 text-sm mb-4">or click to browse</p>
+                <input type="file" id="file-input" accept=".csv,.xlsx" class="hidden">
+                <button onclick="document.getElementById('file-input').click()" 
+                        class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    Browse Files
+                </button>
+                <p class="text-xs text-gray-500 mt-4">Supported formats: CSV, XLSX</p>
+            </div>
+
+            <!-- Upload Status -->
+            <div id="upload-status" class="mt-6 hidden"></div>
+
+            <!-- Dataset List -->
+            <div id="dataset-list" class="mt-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                    <i data-lucide="folder" class="w-5 h-5 text-purple-600 mr-2"></i>
+                    Available Datasets
+                </h3>
+                <div id="datasets-container" class="space-y-2">
+                    <p class="text-gray-500 text-sm">Loading datasets...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Links Section -->
+        <section class="grid md:grid-cols-3 gap-6 mb-8">
+            <a href="/dashboard" class="card rounded-2xl p-6 hover:shadow-xl transition transform hover:-translate-y-1">
+                <div class="flex items-center mb-4">
+                    <i data-lucide="bar-chart-3" class="w-8 h-8 text-blue-600 mr-3"></i>
+                    <h3 class="text-xl font-bold text-gray-800">Dashboard</h3>
+                </div>
+                <p class="text-gray-600">Explore the original dataset, baseline features, and enhanced features with detailed analysis</p>
+            </a>
+
+            <a href="/insert" class="card rounded-2xl p-6 hover:shadow-xl transition transform hover:-translate-y-1">
+                <div class="flex items-center mb-4">
+                    <i data-lucide="plus-circle" class="w-8 h-8 text-green-600 mr-3"></i>
+                    <h3 class="text-xl font-bold text-gray-800">Insert Data</h3>
+                </div>
+                <p class="text-gray-600">Add new passenger records to the Titanic dataset with an intuitive form</p>
+            </a>
+
+            <div class="card rounded-2xl p-6 bg-gradient-to-br from-purple-50 to-pink-50">
+                <div class="flex items-center mb-4">
+                    <i data-lucide="zap" class="w-8 h-8 text-purple-600 mr-3"></i>
+                    <h3 class="text-xl font-bold text-gray-800">Current Page</h3>
+                </div>
+                <p class="text-gray-600">Train and experiment with Random Forest models using various configurations</p>
+            </div>
+        </section>
+
+        <!-- Random Forest Explanation Section -->
+        <section class="card rounded-2xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="trees" class="w-8 h-8 text-green-600 mr-3"></i>
+                Understanding Random Forest Classifier
+            </h2>
+            
+            <div class="prose max-w-none">
+                <p class="text-gray-700 mb-6 text-lg">
+                    Random Forest is an ensemble learning method that creates multiple decision trees and combines their predictions for better accuracy and reliability.
+                </p>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Number of Trees -->
+                    <div class="bg-blue-50 p-5 rounded-xl border-2 border-blue-200">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="trees" class="w-6 h-6 text-blue-600 mr-2"></i>
+                            <h3 class="text-lg font-bold text-blue-900">Number of Trees</h3>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-3">
+                            How many decision trees to build in the forest.
+                        </p>
+                        <div class="bg-white p-3 rounded-lg">
+                            <p class="text-xs text-gray-600 mb-2"><strong>More trees (200+):</strong></p>
+                            <p class="text-xs text-gray-600 mb-2">✓ More stable predictions</p>
+                            <p class="text-xs text-gray-600 mb-3">✗ Slower training</p>
+                            
+                            <p class="text-xs text-gray-600 mb-2"><strong>Fewer trees (50-100):</strong></p>
+                            <p class="text-xs text-gray-600 mb-2">✓ Faster training</p>
+                            <p class="text-xs text-gray-600">✗ Less stable results</p>
+                        </div>
+                    </div>
+
+                    <!-- Max Depth -->
+                    <div class="bg-purple-50 p-5 rounded-xl border-2 border-purple-200">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="git-branch" class="w-6 h-6 text-purple-600 mr-2"></i>
+                            <h3 class="text-lg font-bold text-purple-900">Max Depth</h3>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-3">
+                            Maximum levels each tree can grow to.
+                        </p>
+                        <div class="bg-white p-3 rounded-lg">
+                            <p class="text-xs text-gray-600 mb-2"><strong>Deep trees (15-20):</strong></p>
+                            <p class="text-xs text-gray-600 mb-2">✓ Captures complex patterns</p>
+                            <p class="text-xs text-gray-600 mb-3">✗ Risk of overfitting</p>
+                            
+                            <p class="text-xs text-gray-600 mb-2"><strong>Shallow trees (5-10):</strong></p>
+                            <p class="text-xs text-gray-600 mb-2">✓ Prevents overfitting</p>
+                            <p class="text-xs text-gray-600">✗ May miss patterns</p>
+                        </div>
+                    </div>
+
+                    <!-- Min Samples Leaf -->
+                    <div class="bg-green-50 p-5 rounded-xl border-2 border-green-200">
+                        <div class="flex items-center mb-3">
+                            <i data-lucide="leaf" class="w-6 h-6 text-green-600 mr-2"></i>
+                            <h3 class="text-lg font-bold text-green-900">Min Samples Leaf</h3>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-3">
+                            Minimum samples required at each leaf node.
+                        </p>
+                        <div class="bg-white p-3 rounded-lg">
+                            <p class="text-xs text-gray-600 mb-2"><strong>Higher values (5-10):</strong></p>
+                            <p class="text-xs text-gray-600 mb-2">✓ Smoother model</p>
+                            <p class="text-xs text-gray-600 mb-3">✗ May underfit</p>
+                            
+                            <p class="text-xs text-gray-600 mb-2"><strong>Lower values (1-2):</strong></p>
+                            <p class="text-xs text-gray-600 mb-2">✓ Detailed learning</p>
+                            <p class="text-xs text-gray-600">✗ Risk of overfitting</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                    <p class="text-sm text-yellow-800">
+                        <strong>Tip for Beginners:</strong> Start with default values (100 trees, depth 10, min samples 2) and adjust based on results. The sliders below are pre-configured with optimal ranges!
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration Section -->
+        <section class="card rounded-2xl p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="settings" class="w-8 h-8 text-purple-600 mr-3"></i>
+                Configure Experiment
+            </h2>
+            
+            <form id="ml-form" class="space-y-6">
+                <!-- Feature Generation Toggle -->
+                <div class="p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="use-features" checked class="form-checkbox h-6 w-6 text-purple-600 rounded">
+                        <div class="ml-4">
+                            <span class="text-gray-800 font-bold text-lg">Enable Advanced Feature Generation</span>
+                            <p class="text-sm text-gray-600 mt-1">Creates FamilySize, IsAlone, and Title features from existing data</p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Number of Trees Slider -->
+                <div class="p-5 bg-blue-50 rounded-xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-gray-800 font-semibold flex items-center">
+                            <i data-lucide="trees" class="w-5 h-5 text-blue-600 mr-2"></i>
+                            Number of Trees
+                        </label>
+                        <span id="n-estimators-display" class="slider-value">100</span>
+                    </div>
+                    <input type="range" id="n-estimators" min="50" max="300" value="100" step="10"
+                           class="w-full h-3 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                           oninput="updateSliderValue('n-estimators', 'n-estimators-display')">
+                    <div class="flex justify-between text-xs text-gray-600 mt-2">
+                        <span>50 (Faster)</span>
+                        <span>300 (More Stable)</span>
+                    </div>
+                </div>
+
+                <!-- Max Depth Slider -->
+                <div class="p-5 bg-purple-50 rounded-xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-gray-800 font-semibold flex items-center">
+                            <i data-lucide="git-branch" class="w-5 h-5 text-purple-600 mr-2"></i>
+                            Max Depth
+                        </label>
+                        <span id="max-depth-display" class="slider-value">10</span>
+                    </div>
+                    <input type="range" id="max-depth" min="5" max="20" value="10" step="1"
+                           class="w-full h-3 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                           oninput="updateSliderValue('max-depth', 'max-depth-display')">
+                    <div class="flex justify-between text-xs text-gray-600 mt-2">
+                        <span>5 (Simple)</span>
+                        <span>20 (Complex)</span>
+                    </div>
+                </div>
+
+                <!-- Min Samples Leaf Slider -->
+                <div class="p-5 bg-green-50 rounded-xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-gray-800 font-semibold flex items-center">
+                            <i data-lucide="leaf" class="w-5 h-5 text-green-600 mr-2"></i>
+                            Min Samples per Leaf
+                        </label>
+                        <span id="min-samples-leaf-display" class="slider-value">2</span>
+                    </div>
+                    <input type="range" id="min-samples-leaf" min="1" max="10" value="2" step="1"
+                           class="w-full h-3 bg-green-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                           oninput="updateSliderValue('min-samples-leaf', 'min-samples-leaf-display')">
+                    <div class="flex justify-between text-xs text-gray-600 mt-2">
+                        <span>1 (Detailed)</span>
+                        <span>10 (Smooth)</span>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-8 text-center">
+                <button id="run-button" onclick="runExperiment()" 
+                        class="inline-flex items-center px-10 py-4 text-lg font-medium rounded-full text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-xl transform hover:scale-105 transition duration-300">
+                    <i data-lucide="play-circle" class="w-6 h-6 mr-2"></i> Run Experiment
+                </button>
+                <div id="loading" class="mt-4 text-white font-medium hidden">
+                    <i data-lucide="loader-circle" class="w-5 h-5 animate-spin inline-block mr-2"></i> Training model...
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="hidden">
+            <!-- Performance Metrics -->
+            <div class="card rounded-2xl p-8 mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i data-lucide="bar-chart-3" class="w-8 h-8 text-green-600 mr-3"></i>
+                    Performance Metrics
+                </h2>
+                
+                <div id="model-type" class="mb-6 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-600">
+                    <p class="text-purple-900 font-medium">Model: Random Forest</p>
+                </div>
+
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <!-- Accuracy Card -->
+                    <div class="metric-card bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-blue-700">Accuracy</span>
+                            <i data-lucide="target" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <p id="accuracy-value" class="text-3xl font-bold text-blue-900">-</p>
+                        <p class="text-xs text-gray-600 mt-2">Overall correctness</p>
+                    </div>
+
+                    <!-- Precision Card -->
+                    <div class="metric-card bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border-2 border-green-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-green-700">Precision</span>
+                            <i data-lucide="crosshair" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                        <p id="precision-value" class="text-3xl font-bold text-green-900">-</p>
+                        <p class="text-xs text-gray-600 mt-2">Positive prediction accuracy</p>
+                    </div>
+
+                    <!-- Recall Card -->
+                    <div class="metric-card bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border-2 border-purple-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-purple-700">Recall</span>
+                            <i data-lucide="search" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <p id="recall-value" class="text-3xl font-bold text-purple-900">-</p>
+                        <p class="text-xs text-gray-600 mt-2">Actual positives found</p>
+                    </div>
+
+                    <!-- F1 Score Card -->
+                    <div class="metric-card bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-xl border-2 border-pink-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-pink-700">F1 Score</span>
+                            <i data-lucide="award" class="w-5 h-5 text-pink-600"></i>
+                        </div>
+                        <p id="f1-value" class="text-3xl font-bold text-pink-900">-</p>
+                        <p class="text-xs text-gray-600 mt-2">Balanced measure</p>
+                    </div>
+                </div>
+
+                <!-- Feature Count -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-gray-700">
+                        <span class="font-semibold">Total Features Used:</span> 
+                        <span id="n-features" class="text-purple-600 font-bold">-</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Confusion Matrix -->
+            <div class="card rounded-2xl p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i data-lucide="grid-3x3" class="w-8 h-8 text-orange-600 mr-3"></i>
+                    Confusion Matrix
+                </h2>
+                
+                <div class="flex justify-center">
+                    <div class="inline-block">
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <!-- Header Row -->
+                            <div></div>
+                            <div class="font-semibold text-gray-600 py-2">Predicted: No</div>
+                            <div class="font-semibold text-gray-600 py-2">Predicted: Yes</div>
+                            
+                            <!-- True Negative Row -->
+                            <div class="font-semibold text-gray-600 py-2 text-right pr-4">Actual: No</div>
+                            <div id="cm-tn" class="bg-green-100 border-2 border-green-300 rounded-lg p-6 text-2xl font-bold text-green-900">-</div>
+                            <div id="cm-fp" class="bg-red-100 border-2 border-red-300 rounded-lg p-6 text-2xl font-bold text-red-900">-</div>
+                            
+                            <!-- True Positive Row -->
+                            <div class="font-semibold text-gray-600 py-2 text-right pr-4">Actual: Yes</div>
+                            <div id="cm-fn" class="bg-red-100 border-2 border-red-300 rounded-lg p-6 text-2xl font-bold text-red-900">-</div>
+                            <div id="cm-tp" class="bg-green-100 border-2 border-green-300 rounded-lg p-6 text-2xl font-bold text-green-900">-</div>
+                        </div>
+                        
+                        <div class="mt-4 text-sm text-gray-600 text-center space-y-1">
+                            <p><span class="inline-block w-4 h-4 bg-green-100 border border-green-300 rounded mr-2"></span>Correct Predictions</p>
+                            <p><span class="inline-block w-4 h-4 bg-red-100 border border-red-300 rounded mr-2"></span>Incorrect Predictions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-600 text-sm">
+            <p>&copy; 2024 TitanicML - Ensemble Learning with Feature Generation</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Upload functionality
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        // Load datasets on page load
+        window.addEventListener('load', () => {
+            loadDatasets();
+        });
+
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        async function handleFileUpload(file) {
+            const statusDiv = document.getElementById('upload-status');
+            statusDiv.classList.remove('hidden');
+            
+            // Check file extension
+            const fileName = file.name;
+            const fileExt = fileName.split('.').pop().toLowerCase();
+            
+            if (fileExt !== 'csv' && fileExt !== 'xlsx') {
+                statusDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                        <p class="text-red-700 font-medium">Error: Only CSV and XLSX files are supported</p>
+                    </div>
+                `;
+                return;
+            }
+
+            statusDiv.innerHTML = `
+                <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                    <p class="text-blue-700"><i data-lucide="loader-circle" class="w-4 h-4 animate-spin inline-block mr-2"></i>Uploading ${fileName}...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload_dataset', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded">
+                            <p class="text-green-700 font-medium">
+                                <i data-lucide="check-circle" class="w-4 h-4 inline-block mr-2"></i>${data.message}
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                            <p class="text-yellow-700 font-medium">
+                                <i data-lucide="alert-circle" class="w-4 h-4 inline-block mr-2"></i>${data.message}
+                            </p>
+                        </div>
+                    `;
+                }
+                lucide.createIcons();
+                loadDatasets();
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                        <p class="text-red-700 font-medium">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadDatasets() {
+            try {
+                const response = await fetch('/list_datasets');
+                const data = await response.json();
+
+                const container = document.getElementById('datasets-container');
+                
+                if (data.success && data.datasets.length > 0) {
+                    container.innerHTML = data.datasets.map(dataset => `
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                            <div class="flex items-center">
+                                <i data-lucide="file-spreadsheet" class="w-5 h-5 text-purple-600 mr-3"></i>
+                                <span class="text-gray-700 font-medium">${dataset}</span>
+                            </div>
+                            <button onclick="deleteDataset('${dataset}')" 
+                                    class="text-red-600 hover:text-red-700 transition">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-gray-500 text-sm">No datasets uploaded yet</p>';
+                }
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error loading datasets:', error);
+            }
+        }
+
+        async function deleteDataset(filename) {
+            if (!confirm(`Are you sure you want to delete ${filename}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/delete_dataset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ filename })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadDatasets();
+                }
+            } catch (error) {
+                alert('Error deleting dataset: ' + error.message);
+            }
+        }
+
+        function updateSliderValue(sliderId, displayId) {
+            const slider = document.getElementById(sliderId);
+            const display = document.getElementById(displayId);
+            display.textContent = slider.value;
+        }
+
+        async function runExperiment() {
+            const button = document.getElementById('run-button');
+            const loading = document.getElementById('loading');
+            const resultsSection = document.getElementById('results-section');
+            
+            const useFeatures = document.getElementById('use-features').checked;
+            const nEstimators = document.getElementById('n-estimators').value;
+            const maxDepth = document.getElementById('max-depth').value;
+            const minSamplesLeaf = document.getElementById('min-samples-leaf').value;
+            
+            button.disabled = true;
+            loading.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            
+            try {
+                const formData = new FormData();
+                formData.append('use_features', useFeatures);
+                formData.append('n_estimators', nEstimators);
+                formData.append('max_depth', maxDepth);
+                formData.append('min_samples_leaf', minSamplesLeaf);
+                
+                const response = await fetch('/run_ml', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const results = data.results;
+                    
+                    document.getElementById('model-type').innerHTML = 
+                        `<p class="text-purple-900 font-medium">Model: ${data.model_type}</p>
+                         <p class="text-sm text-gray-600 mt-1">Trees: ${nEstimators} | Depth: ${maxDepth} | Min Leaf: ${minSamplesLeaf}</p>`;
+                    
+                    document.getElementById('accuracy-value').textContent = results.accuracy;
+                    document.getElementById('precision-value').textContent = results.precision;
+                    document.getElementById('recall-value').textContent = results.recall;
+                    document.getElementById('f1-value').textContent = results.f1;
+                    document.getElementById('n-features').textContent = results.n_features;
+                    
+                    const cm = results.confusion_matrix;
+                    document.getElementById('cm-tn').textContent = cm[0][0];
+                    document.getElementById('cm-fp').textContent = cm[0][1];
+                    document.getElementById('cm-fn').textContent = cm[1][0];
+                    document.getElementById('cm-tp').textContent = cm[1][1];
+                    
+                    resultsSection.classList.remove('hidden');
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                button.disabled = false;
+                loading.classList.add('hidden');
+                lucide.createIcons();
+            }
+        }
+    </script>
+
+</body>
+</html>
